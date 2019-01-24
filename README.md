@@ -13,10 +13,21 @@ The utility support USB and UART as serial link.
 ## Installation
 1. Clone
 1. Make sure libusb (1.0) is available
-1. Compile using make
+1. Prepare project using cmake (e.g. makefiles)
+1. Run the build tool (e.g. make)
+1. Install (e.g. make install)
 
 Two binaries are available, imx_usb and imx_uart for the two supported
 connections.
+
+For example on Ubuntu Linux:
+1. git clone <repository-url>
+1. sudo apt install libusb-1.0-0-dev
+1. mkdir build
+1. cd build
+1. cmake ..
+1. make
+1. sudo make install
 
 ### Windows
 

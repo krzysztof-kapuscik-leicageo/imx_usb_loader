@@ -744,12 +744,12 @@ static int verify_memory(struct sdp_dev *dev, struct load_desc *ld, unsigned fof
 		unsigned char *p;
 		unsigned cnt;
 		unsigned char mem_buf[64];
-		int align_cnt = foffset & 0x3f;
+		unsigned align_cnt = foffset & 0x3f;
 		unsigned offset = foffset;
 
 		fetch_data(ld, foffset, &p, &cnt);
 		if (align_cnt) {
-			align_cnt = 64 - align_cnt;
+			align_cnt = 64U - align_cnt;
 			if (cnt > align_cnt)
 				cnt = align_cnt;
 		}
@@ -1363,7 +1363,9 @@ static int process_header(struct sdp_dev *dev, struct sdp_work *curr,
 static int do_download(struct sdp_dev *dev, struct sdp_work *curr, int verify)
 {
 	int ret;
-	struct load_desc ld = {};
+	struct load_desc ld;
+
+	memset(&ld, 0, sizeof(ld));
 
 	print_sdp_work(curr);
 	ld.curr = curr;

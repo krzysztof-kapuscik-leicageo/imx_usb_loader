@@ -20,48 +20,42 @@ The utility support USB and UART as serial link.
 Two binaries are available, imx_usb and imx_uart for the two supported
 connections.
 
-For example on Ubuntu Linux:
-1. git clone <repository-url>
+To specify installation directory different from the default the CMake variable
+could be used: -DCMAKE_INSTALL_PREFIX:PATH=<selected path>.
+
+### Ubuntu Linux Example
+
+Prepare environment:
 1. sudo apt install libusb-1.0-0-dev
+
+Build steps:
+1. git clone <repository-url> [<cloned-dir-name>]
+1. cd <cloned-dir-name>
 1. mkdir build
 1. cd build
 1. cmake ..
 1. make
 1. sudo make install
 
-To specify installation directory different from the default the CMake variable
-could be used: -DCMAKE_INSTALL_PREFIX:PATH=<selected path>.
+### Windows Example
 
-### Windows
+Prepare environment:
+1. Install Visual Studio (e.g. Community Edition)
+1. Install VCPKG (https://github.com/Microsoft/vcpkg)
+1. Install required packages using vcpkg
+1. vcpkg install getopt:x64-windows
+1. vcpkg install libusb:x64-windows
+1. mkdir build
+1. cd build
 
-Two variants have been tested successfully to build imx_usb and imx_uart
-on Windows:
-1. MinGW (using the Microsoft C runtime)
-1. Visual Studio 2015
-
-#### MinGW
-
-MinGW allows to use the GNU toolchain (including GCC) to compile a native
-Microsoft Windows application. A MinGW specific make file (Makefile.mingw)
-is available which allows to build imx_usb/imx_uart with the native make
-port (mingw32-make.exe). After installing MinGW, make sure you have a
-compiled copy of libusb available and build imx_loader using:
-
-```
-mingw32-make -f Makefile.mingw LIBUSBPATH=C:\path\to\libusb
-```
-
-This dynamically links against libusb, hence make sure to ship the
-library libusb-1.0.dll along with imx_usb.exe.
-
-#### Visual Studio
-
-The subdirectory msvc/ contains the project files for Visual Studio 2015.
-Make sure you have the Visual C++ component installed. There is one solution
-containing two projects, one for imx_usb and one for imx_uart. The imx_usb
-project requires libusb to be present at ../../libusb (relative to the msvc)
-directory. If you use an alternative location or compile libusb from source
-too, you will have to alter the include/library path in the project settings.
+Build steps:
+1. git clone <repository-url> [<cloned-dir-name>]
+1. cd <cloned-dir-name>
+1. mkdir build
+1. cd build
+1. Run CMake (use parameters that will suit your environment)
+1. cmake -DCMAKE_INSTALL_PREFIX:PATH=C:\imx_usb_loader -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -G "Visual Studio 15 2017 Win64" ..
+1. Open the created solution and build from UI or use cmake --build .
 
 ### macOS
 

@@ -103,20 +103,49 @@ char const *get_base_path(char const *argv0)
 
 char const *get_global_conf_path(void)
 {
-#ifdef WIN32
-	static char conf[PATH_MAX];
-	static char sep = PATH_SEPARATOR;
-	const char *subdir = "imx_loader";
-	char const *progdata = getenv("ProgramData");
+	static char const *global_conf_path = NULL;
 
-	strncpy(conf, progdata, sizeof(conf));
-	strncat(conf, &sep, sizeof(conf));
-	strncat(conf, subdir, sizeof(conf));
-	return conf;
-#else
-	char const *global_conf_path = SYSCONFDIR "/imx-loader.d/";
-	return global_conf_path;
+	if (global_conf_path != NULL)
+	{
+		return global_conf_path;
+	}
+
+#ifdef WIN32
+	// When NULL is passed to GetModuleHandle, the handle of the exe itself is returned
+	HMODULE module_handle = GetModuleHandle(NULL);
+	if (module_handle != NULL)
+	{
+		char module_path[MAX_PATH];
+
+		// Use GetModuleFileName() with module handle to get the path
+		DWORD rv = GetModuleFileName(module_handle, module_path, (sizeof(module_path)));
+		if ((rv > 0) && (rv < MAX_PATH))
+		{
+			char* last_separator = strrchr(module_path, '\\');
+			if (last_separator != NULL)
+			{
+				*last_separator = 0;
+
+				static char module_conf_path[MAX_PATH];
+
+				snprintf(module_conf_path, sizeof(module_conf_path), "%s%c..%c%s",
+					module_path, PATH_SEPARATOR, PATH_SEPARATOR, IMXRELCONFDIR);
+
+				global_conf_path = module_conf_path;
+			}
+		}
+	}
 #endif
+
+	if (global_conf_path == NULL)
+	{
+		static const char *install_conf_path = IMXABSCONFDIR;
+		global_conf_path = install_conf_path;
+	}
+
+	printf("global configuration directory: %s\n", global_conf_path);
+
+	return global_conf_path;
 }
 
 char const *conf_path_ok(char const *conf_path, char const *conf_file)

@@ -29,8 +29,8 @@ Prepare environment:
 1. sudo apt install libusb-1.0-0-dev
 
 Build steps:
-1. git clone <repository-url> [<cloned-dir-name>]
-1. cd <cloned-dir-name>
+1. git clone &lt;repository-url&gt; [&lt;cloned-dir-name&gt;]
+1. cd &lt;cloned-dir-name&gt;
 1. mkdir build
 1. cd build
 1. cmake ..
@@ -41,21 +41,23 @@ Build steps:
 
 Prepare environment:
 1. Install Visual Studio (e.g. Community Edition)
-1. Install VCPKG (https://github.com/Microsoft/vcpkg)
-1. Install required packages using vcpkg
-1. vcpkg install getopt:x64-windows
-1. vcpkg install libusb:x64-windows
+1. Install [VCPKG](https://github.com/Microsoft/vcpkg)
+1. Install required packages using vcpkg (use the triplet for your target platform):
+    * vcpkg install getopt:x64-windows
+    * vcpkg install libusb:x64-windows
 1. mkdir build
 1. cd build
 
 Build steps:
-1. git clone <repository-url> [<cloned-dir-name>]
-1. cd <cloned-dir-name>
+1. git clone &lt;repository-url&gt; [&lt;cloned-dir-name&gt;]
+1. cd &lt;cloned-dir-name&gt;
 1. mkdir build
 1. cd build
-1. Run CMake (use parameters that will suit your environment)
-1. cmake -DCMAKE_INSTALL_PREFIX:PATH=C:\imx_usb_loader -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -G "Visual Studio 15 2017 Win64" ..
-1. Open the created solution and build from UI or use cmake --build .
+1. Run CMake (use parameters that will suit your environment):
+    * cmake -DCMAKE_INSTALL_PREFIX:PATH=C:\imx_usb_loader -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -G "Visual Studio 15 2017 Win64" ..
+1. Build (pick your favourite):
+   * Open the created solution and build from UI
+   * cmake --build .
 
 ### macOS
 

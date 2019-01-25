@@ -41,6 +41,7 @@ struct sdp_work;
 struct sdp_work {
 	struct sdp_work *next;
 	struct mem_work *mem;
+        char confname[256];
 	char filename[256];
 	unsigned char dcd;
 	unsigned char clear_dcd;		//means clear dcd_ptr

@@ -1360,6 +1360,28 @@ static int process_header(struct sdp_dev *dev, struct sdp_work *curr,
 	return -EINVAL;
 }
 
+static FILE* open_file(struct sdp_work *curr)
+{
+    printf("Trying to open data file: %s\n", curr->filename);
+
+    FILE* fh = fopen(curr->filename, "rb");
+    if (fh == NULL)
+    {
+        char* full_path = malloc(strlen(curr->confname) + 1 + strlen(curr->filename) + 1);
+        strcpy(full_path, curr->confname);
+        char* p = strrchr(full_path, PATH_SEPARATOR);
+        if (p != NULL)
+        {
+            strcpy(p + 1, curr->filename);
+
+            printf("Trying to open data file: %s\n", full_path);
+            fh = fopen(full_path, "rb");
+        }
+        free(full_path);
+    }
+    return fh;    
+}
+
 static int do_download(struct sdp_dev *dev, struct sdp_work *curr, int verify)
 {
 	int ret;
@@ -1370,7 +1392,7 @@ static int do_download(struct sdp_dev *dev, struct sdp_work *curr, int verify)
 	print_sdp_work(curr);
 	ld.curr = curr;
 	ld.verify = verify;
-	ld.xfile = fopen(curr->filename, "rb" );
+	ld.xfile = open_file(curr);
 	if (!ld.xfile) {
 		printf("\nerror, can not open input file: %s\n", curr->filename);
 		return -5;

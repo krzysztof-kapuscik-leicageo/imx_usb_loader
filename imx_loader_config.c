@@ -266,6 +266,7 @@ void parse_file_work(struct sdp_work *curr, const char *filename, const char *p)
 {
 	const char *start = p;
 
+        move_string(curr->confname, filename, sizeof(curr->confname) - 1);
 	p = move_string(curr->filename, p, sizeof(curr->filename) - 1);
 	p = skip(p,':');
 	for (;;) {

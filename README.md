@@ -56,19 +56,13 @@ Build steps:
 1. Run CMake (use parameters that will suit your environment):
     * cmake -DCMAKE_INSTALL_PREFIX:PATH=C:\imx_usb_loader -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -G "Visual Studio 15 2017 Win64" ..
 1. Build (pick your favourite):
-   * Open the created solution and build from UI
-   * cmake --build .
-
-### macOS
-
-libusb and pkg-config can be installed via Homebrew.
-
-If imx_usb fails to claim interface, com.apple.driver.usb.IOUSBHostHIDDevice
-needs to be unloaded so libusb can claim, run:
-
-```
-sudo kextunload -b com.apple.driver.usb.IOUSBHostHIDDevice
-```
+    * Open the created solution and build from UI
+    * cmake --build .
+1. Install
+    * Compile INSTALL project in Visual Studio
+1. Build installer file
+    * Requires installation of [NSIS](http://nsis.sourceforge.io/)
+    * Compile PACKAGE project in Visual Studio
 
 ## Usage
 Using USB, your device should be detected automatically using the USB

@@ -1,3 +1,7 @@
+[![GitHub License](https://img.shields.io/github/license/saveman/imx_usb_loader.svg?style=flat)](https://github.com/saveman/imx_usb_loader/blob/master/COPYING)
+[![GitHub Release](https://img.shields.io/github/release/saveman/imx_usb_loader.svg?style=flat)](https://github.com/saveman/imx_usb_loader/releases/latest)
+[![Build Status](https://travis-ci.org/saveman/imx_usb_loader.svg?branch=master)](https://travis-ci.org/saveman/imx_usb_loader)
+
 # imx_loader
 
 i.MX/Vybrid recovery utility

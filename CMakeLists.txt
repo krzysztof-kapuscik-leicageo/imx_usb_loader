@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 set(imxusbloader_VERSION_MAJOR             1)
 set(imxusbloader_VERSION_MINOR             0)
-set(imxusbloader_VERSION_PATCH             0)
+set(imxusbloader_VERSION_PATCH             1)
 set(imxusbloader_VERSION_TWEAK             0)
 set(imxusbloader_VERSION_FULL              "${imxusbloader_VERSION_MAJOR}.${imxusbloader_VERSION_MINOR}.${imxusbloader_VERSION_PATCH}.${imxusbloader_VERSION_TWEAK}")
 
@@ -89,6 +89,7 @@ install(FILES ${CONFIGURATION_FILES}
     DESTINATION ${IMXRELCONFDIR}
     COMPONENT "ConfigurationFiles")
 if(WIN32)
+    set(CMAKE_INSTALL_SYSTEM_RUNTIME_COMPONENT "Executables")
     include (InstallRequiredSystemLibraries)
 
     install(
@@ -101,39 +102,39 @@ endif()
 #---------- Packaging -------------
 
 if(WIN32)
+    # Copy needed, WIX must have valid file extension
+    configure_file("COPYING" "COPYING.TXT" COPYONLY)
+
+    set(CPACK_GENERATOR                 "WIX;ZIP")
+
     # CPack configuration
     set(CPACK_PACKAGE_VERSION_MAJOR     ${PROJECT_VERSION_MAJOR})
     set(CPACK_PACKAGE_VERSION_MINOR     ${PROJECT_VERSION_MINOR})
     set(CPACK_PACKAGE_VERSION_PATCH     ${PROJECT_VERSION_PATCH})
-    set(CPACK_PACKAGE_NAME              "IMX USB Loader")
+    set(CPACK_PACKAGE_NAME              "ImxUsbLoader")
     set(CPACK_PACKAGE_VENDOR            "Octaedr Software")
-    #set(CPACK_PACKAGE_DESCRIPTION      "")
-    #set(CPACK_PACKAGE_DESCRIPTION_FILE "")
-    #set(CPACK_PACKAGE_ICON             "")
-    set(CPACK_RESOURCE_FILE_LICENSE    "${PROJECT_SOURCE_DIR}/COPYING")
-    #set(CPACK_RESOURCE_FILE_README     "")
-    #set(CPACK_RESOURCE_FILE_WELCOME    "")
+    #set(CPACK_PACKAGE_DESCRIPTION       "")
+    #set(CPACK_PACKAGE_DESCRIPTION_FILE  "")
+    #set(CPACK_PACKAGE_ICON              "")
+    set(CPACK_RESOURCE_FILE_LICENSE    "${CMAKE_CURRENT_BINARY_DIR}/COPYING.TXT")
+    #set(CPACK_RESOURCE_FILE_README      "")
+    #set(CPACK_RESOURCE_FILE_WELCOME     "")
     #set(CPACK_PACKAGE_EXECUTABLES       "imx_usb;imx_uart")
     #set(CPACK_CREATE_DESKTOP_LINKS      "imx_usb;imx_uart")
     set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}")
 
-    set(CPACK_NSIS_DISPLAY_NAME         "IMX USB Loader")
-    set(CPACK_NSIS_PACKAGE_NAME         "IMX USB Loader")
-    #set(CPACK_NSIS_MUI_FINISHPAGE_RUN   "imx_usb")
-    set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL  "ON")
-    #set(CPACK_NSIS_INSTALLED_ICON_NAME  "bin\\\\imx_usb.exe")
-    #set(CPACK_NSIS_MUI_ICON             "${PROJECT_SOURCE_DIR}/install.ico")
-    #set(CPACK_NSIS_MUI_UNIICON          "${PROJECT_SOURCE_DIR}/install.ico")
-    set(CPACK_NSIS_MODIFY_PATH          "ON")
+    set(CPACK_WIX_UPGRADE_GUID           "40239A0C-7E51-4E4A-AFA9-E74606C68A70")
+    list(APPEND CPACK_WIX_EXTRA_SOURCES  "${CMAKE_CURRENT_SOURCE_DIR}/wix_extras.wxs")
+    list(APPEND CPACK_WIX_PATCH_FILE    "${CMAKE_CURRENT_SOURCE_DIR}/wix_patch.xml")
 
     include(CPack)
 
     cpack_add_component(Executables
-                        DISPLAY_NAME "Executables"
-                        DESCRIPTION "Programs and required libraries"
-                        REQUIRED)
+        DISPLAY_NAME "Executables"
+        DESCRIPTION "Programs and required libraries"
+        REQUIRED)
     cpack_add_component(ConfigurationFiles
-                        DISPLAY_NAME "Configuration Files"
-                        DESCRIPTION "Set of default configuration files"
-                        DEPENDS Executables)
+        DISPLAY_NAME "Configuration Files"
+        DESCRIPTION "Set of default configuration files"
+        DEPENDS Executables)
 endif()

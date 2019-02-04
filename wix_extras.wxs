@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <DirectoryRef Id="TARGETDIR">
+            <Component Id="ModifyPathAllUsers" Guid="20b7067b-70c9-40de-97aa-a81c462a8a13">
+                <Environment Action="set" Id="MyPath" Name="PATH" Part="first" System="yes" Value="[CM_DP_Executables.bin]"/>
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+</Wix>

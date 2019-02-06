@@ -1,7 +1,7 @@
 <CPackWiXPatch>
-	<CPackWiXFragment Id="#PRODUCTFEATURE">
-		<Feature Id="ModifyPathAllUsersFeature" Title="Modify PATH" Description="Modify PATH for all users">
+    <CPackWiXFragment Id="#PRODUCTFEATURE">
+        <Feature Id="ModifyPathAllUsersFeature" Title="Modify PATH" Description="Modify PATH for all users" Level="32767">
             <ComponentRef Id="ModifyPathAllUsers" />
-		</Feature>
-	</CPackWiXFragment>
+        </Feature>
+    </CPackWiXFragment>
 </CPackWiXPatch>

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 set(imxusbloader_VERSION_MAJOR             1)
 set(imxusbloader_VERSION_MINOR             0)
-set(imxusbloader_VERSION_PATCH             1)
+set(imxusbloader_VERSION_PATCH             2)
 set(imxusbloader_VERSION_TWEAK             0)
 set(imxusbloader_VERSION_FULL              "${imxusbloader_VERSION_MAJOR}.${imxusbloader_VERSION_MINOR}.${imxusbloader_VERSION_PATCH}.${imxusbloader_VERSION_TWEAK}")
 

@@ -101,40 +101,58 @@ endif()
 
 #---------- Packaging -------------
 
-if(WIN32)
-    # Copy needed, WIX must have valid file extension
-    configure_file("COPYING" "COPYING.TXT" COPYONLY)
+# Copy needed, WIX must have valid file extension
+configure_file("COPYING" "COPYING.TXT" COPYONLY)
 
+# CPack configuration
+set(CPACK_PACKAGE_VERSION_MAJOR         ${PROJECT_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR         ${PROJECT_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH         ${PROJECT_VERSION_PATCH})
+set(CPACK_PACKAGE_NAME                  "ImxUsbLoader")
+set(CPACK_PACKAGE_VENDOR                "Octaedr Software")
+#set(CPACK_PACKAGE_DESCRIPTION          "")
+#set(CPACK_PACKAGE_DESCRIPTION_FILE     "")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY   "i.MX/Vybrid recovery utility")
+#set(CPACK_PACKAGE_ICON                 "")
+set(CPACK_RESOURCE_FILE_LICENSE         "${CMAKE_CURRENT_BINARY_DIR}/COPYING.TXT")
+#set(CPACK_RESOURCE_FILE_README         "")
+#set(CPACK_RESOURCE_FILE_WELCOME        "")
+#set(CPACK_PACKAGE_EXECUTABLES          "imx_usb;imx_uart")
+#set(CPACK_CREATE_DESKTOP_LINKS         "imx_usb;imx_uart")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY     "${CPACK_PACKAGE_NAME}")
+set(CPACK_PACKAGE_CONTACT               "k.kapuscik@gmail.com")
+
+if(WIN32)
     set(CPACK_GENERATOR                 "WIX;ZIP")
 
-    # CPack configuration
-    set(CPACK_PACKAGE_VERSION_MAJOR     ${PROJECT_VERSION_MAJOR})
-    set(CPACK_PACKAGE_VERSION_MINOR     ${PROJECT_VERSION_MINOR})
-    set(CPACK_PACKAGE_VERSION_PATCH     ${PROJECT_VERSION_PATCH})
-    set(CPACK_PACKAGE_NAME              "ImxUsbLoader")
-    set(CPACK_PACKAGE_VENDOR            "Octaedr Software")
-    #set(CPACK_PACKAGE_DESCRIPTION       "")
-    #set(CPACK_PACKAGE_DESCRIPTION_FILE  "")
-    #set(CPACK_PACKAGE_ICON              "")
-    set(CPACK_RESOURCE_FILE_LICENSE    "${CMAKE_CURRENT_BINARY_DIR}/COPYING.TXT")
-    #set(CPACK_RESOURCE_FILE_README      "")
-    #set(CPACK_RESOURCE_FILE_WELCOME     "")
-    #set(CPACK_PACKAGE_EXECUTABLES       "imx_usb;imx_uart")
-    #set(CPACK_CREATE_DESKTOP_LINKS      "imx_usb;imx_uart")
-    set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}")
-
-    set(CPACK_WIX_UPGRADE_GUID           "40239A0C-7E51-4E4A-AFA9-E74606C68A70")
-    list(APPEND CPACK_WIX_EXTRA_SOURCES  "${CMAKE_CURRENT_SOURCE_DIR}/wix_extras.wxs")
+    set(CPACK_WIX_UPGRADE_GUID          "40239A0C-7E51-4E4A-AFA9-E74606C68A70")
+    list(APPEND CPACK_WIX_EXTRA_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/wix_extras.wxs")
     list(APPEND CPACK_WIX_PATCH_FILE    "${CMAKE_CURRENT_SOURCE_DIR}/wix_patch.xml")
+elseif(UNIX)
+    set(CPACK_GENERATOR                 "DEB;ZIP")
 
-    include(CPack)
+    if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
+        set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE   "amd64")
+    else()
+        set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE   "i386")
+    endif()
 
-    cpack_add_component(Executables
-        DISPLAY_NAME "Executables"
-        DESCRIPTION "Programs and required libraries"
-        REQUIRED)
-    cpack_add_component(ConfigurationFiles
-        DISPLAY_NAME "Configuration Files"
-        DESCRIPTION "Set of default configuration files"
-        DEPENDS Executables)
+    set(CPACK_DEBIAN_PACKAGE_NAME       "imx-usb-loader")
+    set(CPACK_DEBIAN_PACKAGE_VERSION    "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS    "libusb-1.0-0 (>= 2:1.0.20-1)")
+    set(CPACK_DEBIAN_PACKAGE_SECTION    "embedded")
+    set(CPACK_DEBIAN_PACKAGE_HOMEPAGE   "https://github.com/saveman/imx_usb_loader")
+
+    set(CPACK_PACKAGE_FILE_NAME         "${CPACK_DEBIAN_PACKAGE_NAME}-${CPACK_DEBIAN_PACKAGE_VERSION}-${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
 endif()
+
+include(CPack)
+
+cpack_add_component(Executables
+    DISPLAY_NAME "Executables"
+    DESCRIPTION "Programs and required libraries"
+    REQUIRED)
+cpack_add_component(ConfigurationFiles
+    DISPLAY_NAME "Configuration Files"
+    DESCRIPTION "Set of default configuration files"
+    DEPENDS Executables)

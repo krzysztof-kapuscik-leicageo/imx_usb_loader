@@ -17,4 +17,5 @@ script:
   - make
   - make install
   - make package
+  - make test
 

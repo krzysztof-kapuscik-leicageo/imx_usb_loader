@@ -126,20 +126,26 @@ if(WIN32)
     STRING(REPLACE "/" "\\\\" TESTS_CONFIG_DIR ${TESTS_CONFIG_DIR})
 endif()
 
+if(WIN32)
+    set(TEST_RUNNER "runtest.bat")
+else()
+    set(TEST_RUNNER "runtest.sh")
+endif()
+
 add_test(
     NAME test.imx
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests
-    COMMAND runtest.bat $<TARGET_FILE:imx_usb> test.imx ${TESTS_CONFIG_DIR}
+    COMMAND ${TEST_RUNNER} $<TARGET_FILE:imx_usb> test.imx ${TESTS_CONFIG_DIR}
 )
 add_test(
     NAME test-dcd.imx
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests
-    COMMAND runtest.bat $<TARGET_FILE:imx_usb> test-dcd.imx ${TESTS_CONFIG_DIR}
+    COMMAND ${TEST_RUNNER} $<TARGET_FILE:imx_usb> test-dcd.imx ${TESTS_CONFIG_DIR}
 )
 add_test(
     NAME test-plugin.imx
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests
-    COMMAND runtest.bat $<TARGET_FILE:imx_usb> test-plugin.imx ${TESTS_CONFIG_DIR}
+    COMMAND ${TEST_RUNNER} $<TARGET_FILE:imx_usb> test-plugin.imx ${TESTS_CONFIG_DIR}
 )
 
 #---------- Packaging -------------

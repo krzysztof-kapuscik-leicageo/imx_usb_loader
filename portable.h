@@ -35,6 +35,8 @@ extern int debugmode;
 #include <sys/param.h>
 #endif
 
+#include "osal.h"
+
 #ifndef WIN32
 #define PATH_SEPARATOR '/'
 #define msleep(ms) usleep((ms) * 1000)

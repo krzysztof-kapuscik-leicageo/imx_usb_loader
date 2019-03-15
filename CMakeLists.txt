@@ -21,12 +21,19 @@ set(IMX_COMMON_SOURCES
     imx_loader.h
     imx_sdp.c
     imx_sdp.h
+    osal.h
+    osal.c
     portable.h
 )
 
-set(IMX_USB_SOURCES
+set(IMX_USB_LIB_SOURCES
     imx_sdp_simulation.c
     imx_sdp_simulation.h
+    imx_usb.c
+    imx_usb_lib.h
+)
+
+set(IMX_USB_SOURCES
     imx_usb.c
 )
 
@@ -56,9 +63,21 @@ add_custom_command(TARGET imx_common
         ${CONFIGURATION_FILES}
         $<TARGET_FILE_DIR:imx_common>)
 
+add_library(imx_usb_lib STATIC ${IMX_USB_LIB_SOURCES})
+target_compile_definitions(imx_usb_lib PRIVATE IMX_USB_LIB_ONLY)
+target_link_libraries(imx_usb_lib PRIVATE imx_common)
+target_include_directories(imx_usb_lib PRIVATE ${LIBUSB10_INCLUDE_DIRS})
+target_link_libraries(imx_usb_lib PRIVATE ${LIBUSB10_LIBRARIES})
+target_compile_definitions(imx_usb_lib PRIVATE ${LIBUSB10_DEFINITIONS})
+if(MSVC)
+    target_compile_definitions(imx_usb_lib PRIVATE _CRT_SECURE_NO_WARNINGS=1)
+endif()
+
 add_executable(imx_usb ${IMX_USB_SOURCES})
-target_include_directories(imx_usb PRIVATE ${LIBUSB10_INCLUDE_DIRS})
+target_compile_definitions(imx_usb PRIVATE IMX_USB_APP_ONLY)
 target_link_libraries(imx_usb PRIVATE imx_common)
+target_link_libraries(imx_usb PRIVATE imx_usb_lib)
+target_include_directories(imx_usb PRIVATE ${LIBUSB10_INCLUDE_DIRS})
 target_link_libraries(imx_usb PRIVATE ${LIBUSB10_LIBRARIES})
 target_compile_definitions(imx_usb PRIVATE ${LIBUSB10_DEFINITIONS})
 if(WIN32)

@@ -27,7 +27,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
+#ifdef IMX_USB_APP_ONLY
 #include <getopt.h>
+#endif /* IMX_USB_LIB_ONLY */
 
 #ifdef __FreeBSD__
 #include <libusb.h>
@@ -40,6 +42,9 @@
 #include "imx_sdp_simulation.h"
 #include "imx_loader.h"
 #include "imx_loader_config.h"
+#include "imx_usb_lib.h"
+
+#ifdef IMX_USB_LIB_ONLY
 
 struct mach_id;
 struct mach_id {
@@ -139,13 +144,13 @@ static struct mach_id *parse_imx_conf(char const *filename)
 	struct mach_id *curr = NULL;
 	const char *p;
 
-	FILE* xfile = fopen(filename, "rb" );
+	imx_osal_file* xfile = imx_get_osal()->file_open(filename, "rb" );
 	if (!xfile) {
 		printf("Could not open file: %s\n", filename);
 		return NULL;
 	}
 
-	while (fgets(line, sizeof(line), xfile) != NULL) {
+	while (imx_get_osal()->file_gets(line, sizeof(line), xfile) != NULL) {
 		p = line;
 		curr = parse_imx_mach(&p);
 		if (!curr)
@@ -167,7 +172,7 @@ static struct mach_id *parse_imx_conf(char const *filename)
 		}
 	}
 
-	fclose(xfile);
+	imx_get_osal()->file_close(xfile);
 	return head;
 }
 
@@ -243,7 +248,7 @@ static libusb_device *find_imx_dev(libusb_device **devs, struct mach_id **pp_id,
  *  (max size of 65 bytes with 1st byte of 0x04)
  *
  */
-int transfer_hid(struct sdp_dev *dev, int report, unsigned char *p, unsigned int cnt,
+static int transfer_hid(struct sdp_dev *dev, int report, unsigned char *p, unsigned int cnt,
 		unsigned int expected, int* last_trans)
 {
 	int err;
@@ -307,7 +312,7 @@ int transfer_hid(struct sdp_dev *dev, int report, unsigned char *p, unsigned int
  * (max packet size of 512 bytes)
  */
 
-int transfer_bulk(struct sdp_dev *dev, int report, unsigned char *p, unsigned int cnt,
+static int transfer_bulk(struct sdp_dev *dev, int report, unsigned char *p, unsigned int cnt,
 		unsigned int expected, int* last_trans)
 {
 	int err;
@@ -329,7 +334,7 @@ int transfer_bulk(struct sdp_dev *dev, int report, unsigned char *p, unsigned in
 	return err;
 }
 
-int transfer_simulation(struct sdp_dev *dev, int report, unsigned char *p, unsigned int cnt,
+static int transfer_simulation(struct sdp_dev *dev, int report, unsigned char *p, unsigned int cnt,
 		unsigned int expected, int* last_trans)
 {
 	int err = 0;
@@ -359,6 +364,10 @@ int transfer_simulation(struct sdp_dev *dev, int report, unsigned char *p, unsig
 	return err;
 }
 
+#endif /* IMX_USB_LIB_ONLY */
+
+#ifdef IMX_USB_APP_ONLY
+
 #define ARRAY_SIZE(w) sizeof(w)/sizeof(w[0])
 void print_usage(void)
 {
@@ -384,6 +393,10 @@ void print_usage(void)
 		"is specified, the jobs defined in the target specific configuration file\n"
 		"is being used.\n");
 }
+
+#endif /* IMX_USB_APP_ONLY */
+
+#ifdef IMX_USB_LIB_ONLY
 
 int do_simulation_dev(char const *base_path, char const *conf_path,
 		struct mach_id *list, int verify, struct sdp_work *cmd_head,
@@ -557,6 +570,10 @@ out_deinit_usb:
 	return err;
 }
 
+#endif /* IMX_USB_LIB_ONLY */
+
+#ifdef IMX_USB_APP_ONLY
+
 static const struct option long_options[] = {
 	{"help",	no_argument, 		0, 'h' },
 	{"debugmode",	no_argument, 		0, 'd' },
@@ -571,15 +588,15 @@ static const struct option long_options[] = {
 
 int main(int argc, char * const argv[])
 {
-	int err, c;
-	int verify = 0;
-	struct sdp_work *cmd_head = NULL;
-	char const *conf;
-	char const *base_path = get_base_path(argv[0]);
-	char const *conf_path = get_global_conf_path();
-	char const *sim_vidpid = NULL;
-	int bus = -1;
-	int address = -1;
+	int c;
+	struct usb_app_args app_args;
+	app_args.verify = 0;
+	app_args.cmd_head = NULL;
+	app_args.base_path = get_base_path(argv[0]);
+	app_args.conf_path = get_global_conf_path();
+	app_args.sim_vidpid = NULL;
+	app_args.bus = -1;
+	app_args.address = -1;
 
 	while ((c = getopt_long(argc, argv, "+hdvVc:b:D:S:", long_options, NULL)) != -1) {
 		switch (c)
@@ -592,33 +609,43 @@ int main(int argc, char * const argv[])
 			debugmode = 1; /* global extern */
 			break;
 		case 'v':
-			verify = 1;
+			app_args.verify = 1;
 			break;
 		case 'V':
 			printf("imx_usb " IMX_LOADER_VERSION "\n");
 			return EXIT_SUCCESS;
 		case 'c':
-			conf_path = optarg;
+			app_args.conf_path = optarg;
 			break;
 		case 'b':
-			bus = atoi(optarg);
+			app_args.bus = atoi(optarg);
 			break;
 		case 'D':
-			address = atoi(optarg);
+			app_args.address = atoi(optarg);
 			break;
 		case 'S':
-			sim_vidpid = optarg;
+			app_args.sim_vidpid = optarg;
 			break;
 		}
 	}
 
 	if (optind < argc) {
 		// Parse optional job arguments...
-		cmd_head = parse_cmd_args(argc - optind, &argv[optind]);
+		app_args.cmd_head = parse_cmd_args(argc - optind, &argv[optind]);
 	}
 
+	return usb_app_execute(&app_args);
+}
+#endif /* IMX_USB_APP_ONLY */
+
+#ifdef IMX_USB_LIB_ONLY
+int usb_app_execute(struct usb_app_args* args)
+{
+	int err = -1;
+	char const *conf = NULL;
+
 	// Get list of machines...
-	conf = conf_file_name("imx_usb.conf", base_path, conf_path);
+	conf = conf_file_name("imx_usb.conf", args->base_path, args->conf_path);
 	if (conf == NULL)
 		return EXIT_FAILURE;
 
@@ -626,14 +653,15 @@ int main(int argc, char * const argv[])
 	if (!list)
 		return EXIT_FAILURE;
 
-	if (sim_vidpid)
-		err = do_simulation_dev(base_path, conf_path, list, verify,
-					cmd_head, sim_vidpid);
+	if (args->sim_vidpid)
+		err = do_simulation_dev(args->base_path, args->conf_path, list, args->verify,
+					args->cmd_head, args->sim_vidpid);
 	else
-		err = do_autodetect_dev(base_path, conf_path, list, verify,
-					cmd_head, bus, address);
+		err = do_autodetect_dev(args->base_path, args->conf_path, list, args->verify,
+					args->cmd_head, args->bus, args->address);
 	if (err < 0)
 		return EXIT_FAILURE;
 
 	return EXIT_SUCCESS;
 }
+#endif /* IMX_USB_LIB_ONLY */

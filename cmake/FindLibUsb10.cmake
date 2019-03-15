@@ -46,6 +46,7 @@
 
 find_path(LIBUSB10_INCLUDE_DIR
 	NAMES
+		libusb-1.0/libusb.h
 		libusb.h
 	PATHS
 		/usr/include

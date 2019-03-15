@@ -398,7 +398,7 @@ void parse_transfer_type(struct sdp_dev *usb, const char *filename, const char *
 struct sdp_dev *parse_conf(const char *filename)
 {
 	char line[512];
-	FILE *xfile;
+	imx_osal_file *xfile;
 	const char *p;
 	struct sdp_work *tail = NULL;
 	struct sdp_work *curr = NULL;
@@ -407,7 +407,7 @@ struct sdp_dev *parse_conf(const char *filename)
 		return NULL;
 	memset(usb, 0, sizeof(struct sdp_dev));
 
-	xfile = fopen(filename, "rb" );
+	xfile = imx_get_osal()->file_open(filename, "rb" );
 	if (!xfile) {
 		printf("Could not open file: {%s}\n", filename);
 		free(usb);
@@ -415,7 +415,7 @@ struct sdp_dev *parse_conf(const char *filename)
 	}
 	printf("parse %s\n", filename);
 
-	while (fgets(line, sizeof(line), xfile) != NULL) {
+	while (imx_get_osal()->file_gets(line, sizeof(line), xfile) != NULL) {
 		p = line;
 		while (*p==' ') p++;
 		if (p[0] == '#')
@@ -456,6 +456,7 @@ struct sdp_dev *parse_conf(const char *filename)
 			curr = NULL;
 		}
 	}
+	imx_get_osal()->file_close(xfile);
 	return usb;
 }
 

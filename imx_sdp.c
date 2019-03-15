@@ -49,7 +49,7 @@ int debugmode = 0;
 
 struct load_desc {
 	struct sdp_work *curr;
-	FILE* xfile;
+	imx_osal_file* xfile;
 	unsigned fsize;
 	int verify;
 	unsigned char *buf_start;
@@ -146,12 +146,12 @@ static void print_sdp_work(struct sdp_work *curr)
 	return;
 }
 
-static long get_file_size(FILE *xfile)
+static long get_file_size(imx_osal_file *xfile)
 {
 	long size;
-	fseek(xfile, 0, SEEK_END);
-	size = ftell(xfile);
-	rewind(xfile);
+	imx_get_osal()->file_seek(xfile, 0, SEEK_END);
+	size = imx_get_osal()->file_tell(xfile);
+	imx_get_osal()->file_rewind(xfile);
 //	printf("filesize=%lx\n", size);
 	return size;
 }
@@ -720,9 +720,9 @@ static void fetch_data(struct load_desc *ld, unsigned foffset, unsigned char **p
 	}
 	skip = foffset - ld->buf_offset;
 	if (skip >= buf_cnt) {
-		fseek(ld->xfile, foffset, SEEK_SET);
+		imx_get_osal()->file_seek(ld->xfile, foffset, SEEK_SET);
 		ld->buf_offset = foffset;
-		buf_cnt = ld->buf_cnt = fread(ld->buf_start, 1, ld->buf_size, ld->xfile);
+		buf_cnt = ld->buf_cnt = (unsigned int)imx_get_osal()->file_read(ld->buf_start, 1, ld->buf_size, ld->xfile);
 		skip = 0;
 	}
 	if ((foffset < ld->header_offset) &&
@@ -1277,9 +1277,9 @@ static int process_header(struct sdp_dev *dev, struct sdp_work *curr,
 		}
 		if ((ld->header_offset < ld->buf_offset) ||
 				(ld->header_offset - ld->buf_offset + 32 > ld->buf_cnt)) {
-			fseek(ld->xfile, ld->header_offset, SEEK_SET);
+			imx_get_osal()->file_seek(ld->xfile, ld->header_offset, SEEK_SET);
 			ld->buf_offset = ld->header_offset;
-			ld->buf_cnt = fread(ld->buf_start, 1, ld->buf_size, ld->xfile);
+			ld->buf_cnt = (unsigned int)imx_get_osal()->file_read(ld->buf_start, 1, ld->buf_size, ld->xfile);
 			if (ld->buf_cnt < 32)
 				break;
 		}
@@ -1360,26 +1360,26 @@ static int process_header(struct sdp_dev *dev, struct sdp_work *curr,
 	return -EINVAL;
 }
 
-static FILE* open_file(struct sdp_work *curr)
+static imx_osal_file* open_file(struct sdp_work *curr)
 {
-    printf("Trying to open data file: %s\n", curr->filename);
+	printf("Trying to open data file: %s\n", curr->filename);
 
-    FILE* fh = fopen(curr->filename, "rb");
-    if (fh == NULL)
-    {
-        char* full_path = malloc(strlen(curr->confname) + 1 + strlen(curr->filename) + 1);
-        strcpy(full_path, curr->confname);
-        char* p = strrchr(full_path, PATH_SEPARATOR);
-        if (p != NULL)
-        {
-            strcpy(p + 1, curr->filename);
+	imx_osal_file* fh = imx_get_osal()->file_open(curr->filename, "rb");
+	if (fh == NULL)
+	{
+		char* full_path = malloc(strlen(curr->confname) + 1 + strlen(curr->filename) + 1);
+		strcpy(full_path, curr->confname);
+		char* p = strrchr(full_path, PATH_SEPARATOR);
+		if (p != NULL)
+		{
+			strcpy(p + 1, curr->filename);
 
-            printf("Trying to open data file: %s\n", full_path);
-            fh = fopen(full_path, "rb");
-        }
-        free(full_path);
-    }
-    return fh;    
+			printf("Trying to open data file: %s\n", full_path);
+			fh = imx_get_osal()->file_open(full_path, "rb");
+		}
+		free(full_path);
+	}
+	return fh;    
 }
 
 static int do_download(struct sdp_dev *dev, struct sdp_work *curr, int verify)
@@ -1457,7 +1457,7 @@ static int do_download(struct sdp_dev *dev, struct sdp_work *curr, int verify)
 	}
 
 cleanup:
-	fclose(ld.xfile);
+	imx_get_osal()->file_close(ld.xfile);
 	free(ld.buf_start);
 	return ret;
 }

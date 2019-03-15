@@ -21,6 +21,8 @@
 
 #include <stdio.h>
 
+#include "portable.h"
+
 static imx_osal_file *cast_to_osal_file(FILE *stream)
 {
 	return (imx_osal_file*)stream;
@@ -61,9 +63,14 @@ static void osal_file_rewind(imx_osal_file *stream)
 	rewind(cast_from_osal_file(stream));
 }
 
-long int osal_file_tell(imx_osal_file *stream)
+static long int osal_file_tell(imx_osal_file *stream)
 {
 	return ftell(cast_from_osal_file(stream));
+}
+
+static int osal_file_access_read(const char *filename)
+{
+	return access(filename, R_OK);
 }
 
 struct imx_osal_ops default_osal_ops = {
@@ -73,7 +80,8 @@ struct imx_osal_ops default_osal_ops = {
 	osal_file_seek,
 	osal_file_read,
 	osal_file_rewind,
-	osal_file_tell
+	osal_file_tell,
+	osal_file_access_read
 };
 
 static imx_osal_ops* osal_ops = &default_osal_ops;

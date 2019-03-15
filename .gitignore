@@ -1,5 +1,7 @@
 .vs
 CMakeSettings.json
-tests/*.test
+tests/*.result
+tests/*.result.filtered
+tests/*.output.filtered
 build
 install

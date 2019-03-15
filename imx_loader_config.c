@@ -156,7 +156,7 @@ char const *conf_path_ok(char const *conf_path, char const *conf_file)
 	strncpy(conf, conf_path, sizeof(conf));
 	strncat(conf, &sep, sizeof(conf) - strlen(conf) - 1);
 	strncat(conf, conf_file, sizeof(conf) - strlen(conf) - 1);
-	if (access(conf, R_OK) != -1) {
+	if (imx_get_osal()->file_access_read(conf) == 0) {
 		printf("config file <%s>\n", conf);
 		return conf;
 	}
@@ -505,7 +505,7 @@ struct sdp_work *parse_cmd_args(int argc, char * const *argv)
 		w = malloc(sizeof(struct sdp_work));
 		memset(w, 0, sizeof(struct sdp_work));
 		strncpy(w->filename, argv[i], sizeof(w->filename) - 1);
-		if (access(w->filename, R_OK) == -1) {
+		if (imx_get_osal()->file_access_read(w->filename) != 0) {
 			fprintf(stderr, "cannot read from file %s\n",
 					w->filename);
 			exit(1);

@@ -49,6 +49,9 @@ struct imx_osal_ops
 
 	/* std ftell replacement */
 	long int (*file_tell)(imx_osal_file *stream);
+
+	/* posix access R_OK replacement */
+	int (*file_access_read)(const char *filename);
 };
 typedef struct imx_osal_ops imx_osal_ops;
 

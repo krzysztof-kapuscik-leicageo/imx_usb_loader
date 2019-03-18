@@ -4,6 +4,12 @@
 #include "imx_usb_loader/osal.h"
 #include "imx_usb_loader/imx_usb_lib.h"
 
+#ifndef WIN32
+#define PATH_SEPARATOR '/'
+#else
+#define PATH_SEPARATOR '\\'
+#endif
+
 //--------------------------------------------------------
 
 #define DBGMSG(x)   x
@@ -49,16 +55,23 @@ static const char* get_file_data(const char* filename, int* length)
 
     *length = 0;
 
-    if (strcmp(filename, "/imx_usb.conf") == 0)
+    if (filename[0] == PATH_SEPARATOR)
     {
-        data = FILE_DATA_IMX_USB_CONF;
-        *length = strlen(data);
+        ++filename;
+
+        if (strcmp(filename, "imx_usb.conf") == 0)
+        {
+            data = FILE_DATA_IMX_USB_CONF;
+            *length = strlen(data);
+        }
+        else if (strcmp(filename, "mx6_usb_work.conf") == 0)
+        {
+            data = FILE_DATA_IMX_MX6_USB_WORK_CONF;
+            *length = strlen(data);
+        }
     }
-    else if (strcmp(filename, "/mx6_usb_work.conf") == 0)
-    {
-        data = FILE_DATA_IMX_MX6_USB_WORK_CONF;
-        *length = strlen(data);
-    }
+
+    DBGMSG(printf("get_file_data(%s,%p) -> %p\n", filename, length, data);)
 
     return data;
 }

@@ -1,9 +1,12 @@
+message(WARNING IMX_ROOT=${IMX_ROOT}/include)
+
 find_path(LIBIMXCOMMON_INCLUDE_DIR
     NAMES
         imx_usb_loader/osal.h
     PATHS
         /usr/include
         /usr/local/include
+        ${IMX_ROOT}/include
 )
 
 find_library(LIBIMXCOMMON_LIBRARY
@@ -12,6 +15,7 @@ find_library(LIBIMXCOMMON_LIBRARY
     PATHS
         /usr/lib
         /usr/local/lib
+        ${IMX_ROOT}/lib
 )
 
 include(FindPackageHandleStandardArgs)

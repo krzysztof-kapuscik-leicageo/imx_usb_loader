@@ -4,6 +4,7 @@ find_path(LIBIMXUSBCORE_INCLUDE_DIR
     PATHS
         /usr/include
         /usr/local/include
+        ${IMX_ROOT}/include
 )
 
 find_library(LIBIMXUSBCORE_LIBRARY
@@ -12,6 +13,7 @@ find_library(LIBIMXUSBCORE_LIBRARY
     PATHS
         /usr/lib
         /usr/local/lib
+        ${IMX_ROOT}/lib
 )
 
 include(FindPackageHandleStandardArgs)

@@ -4,16 +4,16 @@
     <Fragment>
         <DirectoryRef Id="TARGETDIR">
             <Component Id="ModifyPathAllUsers" Guid="20b7067b-70c9-40de-97aa-a81c462a8a13">
-                <Environment Action="set" Id="MyPath" Name="PATH" Part="first" System="yes" Value="[CM_DP_Executables.bin]"/>
+                <Environment Action="set" Id="MyPath" Name="PATH" Part="first" System="yes" Value="[CM_DP_runtime.bin]"/>
             </Component>
-            <Component Id="CM_CP_Executables.REGISTRY" Guid="d038ac44-9fdd-4fed-8c64-ead89bfaaa8e">
+            <Component Id="CM_CP_runtime.REGISTRY" Guid="d038ac44-9fdd-4fed-8c64-ead89bfaaa8e">
                 <RegistryKey Root="HKLM" Key="Software\Octaedr\ImxUsbLoader" ForceDeleteOnUninstall="yes">
-                    <RegistryValue Type="string" Name="Path" Value="[CM_DP_Executables.bin]"/>
+                    <RegistryValue Type="string" Name="Path" Value="[CM_DP_runtime.bin]"/>
                 </RegistryKey>
             </Component>
         </DirectoryRef>
-        <FeatureRef Id="CM_C_Executables">
-            <ComponentRef Id="CM_CP_Executables.REGISTRY"/>
+        <FeatureRef Id="CM_C_runtime">
+            <ComponentRef Id="CM_CP_runtime.REGISTRY"/>
         </FeatureRef>
     </Fragment>
 </Wix>

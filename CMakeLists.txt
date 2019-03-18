@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 set(imxusbloader_VERSION_MAJOR             1)
 set(imxusbloader_VERSION_MINOR             0)
-set(imxusbloader_VERSION_PATCH             2)
+set(imxusbloader_VERSION_PATCH             3)
 set(imxusbloader_VERSION_TWEAK             0)
 set(imxusbloader_VERSION_FULL              "${imxusbloader_VERSION_MAJOR}.${imxusbloader_VERSION_MINOR}.${imxusbloader_VERSION_PATCH}.${imxusbloader_VERSION_TWEAK}")
 
@@ -26,10 +26,18 @@ set(IMX_COMMON_SOURCES
     portable.h
 )
 
-set(IMX_USB_LIB_SOURCES
+set(IMX_COMMON_PUBLIC_HEADERS
+    osal.h
+)
+
+set(IMX_USB_CORE_SOURCES
     imx_sdp_simulation.c
     imx_sdp_simulation.h
     imx_usb.c
+    imx_usb_lib.h
+)
+
+set(IMX_USB_CORE_PUBLIC_HEADERS
     imx_usb_lib.h
 )
 
@@ -52,6 +60,7 @@ if(WIN32)
 endif()
 
 add_library(imx_common STATIC ${IMX_COMMON_SOURCES})
+set_target_properties(imx_common PROPERTIES PUBLIC_HEADER "${IMX_COMMON_PUBLIC_HEADERS}")
 target_compile_definitions(imx_common PRIVATE IMXRELCONFDIR="${IMXRELCONFDIR}")
 target_compile_definitions(imx_common PRIVATE IMXABSCONFDIR="${IMXABSCONFDIR}")
 if(MSVC)
@@ -63,20 +72,21 @@ add_custom_command(TARGET imx_common
         ${CONFIGURATION_FILES}
         $<TARGET_FILE_DIR:imx_common>)
 
-add_library(imx_usb_lib STATIC ${IMX_USB_LIB_SOURCES})
-target_compile_definitions(imx_usb_lib PRIVATE IMX_USB_LIB_ONLY)
-target_link_libraries(imx_usb_lib PRIVATE imx_common)
-target_include_directories(imx_usb_lib PRIVATE ${LIBUSB10_INCLUDE_DIRS})
-target_link_libraries(imx_usb_lib PRIVATE ${LIBUSB10_LIBRARIES})
-target_compile_definitions(imx_usb_lib PRIVATE ${LIBUSB10_DEFINITIONS})
+add_library(imx_usb_core STATIC ${IMX_USB_CORE_SOURCES})
+set_target_properties(imx_usb_core PROPERTIES PUBLIC_HEADER "${IMX_USB_CORE_PUBLIC_HEADERS}")
+target_compile_definitions(imx_usb_core PRIVATE IMX_USB_LIB_ONLY)
+target_link_libraries(imx_usb_core PUBLIC imx_common)
+target_include_directories(imx_usb_core PRIVATE ${LIBUSB10_INCLUDE_DIRS})
+target_link_libraries(imx_usb_core PUBLIC ${LIBUSB10_LIBRARIES})
+target_compile_definitions(imx_usb_core PRIVATE ${LIBUSB10_DEFINITIONS})
 if(MSVC)
-    target_compile_definitions(imx_usb_lib PRIVATE _CRT_SECURE_NO_WARNINGS=1)
+    target_compile_definitions(imx_usb_core PRIVATE _CRT_SECURE_NO_WARNINGS=1)
 endif()
 
 add_executable(imx_usb ${IMX_USB_SOURCES})
 target_compile_definitions(imx_usb PRIVATE IMX_USB_APP_ONLY)
 target_link_libraries(imx_usb PRIVATE imx_common)
-target_link_libraries(imx_usb PRIVATE imx_usb_lib)
+target_link_libraries(imx_usb PRIVATE imx_usb_core)
 target_include_directories(imx_usb PRIVATE ${LIBUSB10_INCLUDE_DIRS})
 target_link_libraries(imx_usb PRIVATE ${LIBUSB10_LIBRARIES})
 target_compile_definitions(imx_usb PRIVATE ${LIBUSB10_DEFINITIONS})
@@ -98,27 +108,52 @@ if(MSVC)
     target_compile_definitions(imx_uart PRIVATE _CRT_SECURE_NO_WARNINGS=1)
 endif()
 
+#---------- Installation -------------
+
+install(TARGETS imx_common
+    ARCHIVE
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        COMPONENT "dev"
+    PUBLIC_HEADER
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/imx_usb_loader
+        COMPONENT "dev"
+)
+install(TARGETS imx_usb_core
+    ARCHIVE
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        COMPONENT "dev"
+    PUBLIC_HEADER
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/imx_usb_loader
+        COMPONENT "dev"
+)
+
 install(TARGETS imx_usb
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    COMPONENT "Executables")
+    RUNTIME
+        DESTINATION ${CMAKE_INSTALL_BINDIR}
+        COMPONENT "runtime"
+)
 install(TARGETS imx_uart
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    COMPONENT "Executables")
+    RUNTIME
+        DESTINATION ${CMAKE_INSTALL_BINDIR}
+        COMPONENT "runtime"
+)
 install(FILES ${CONFIGURATION_FILES}
     DESTINATION ${IMXRELCONFDIR}
-    COMPONENT "ConfigurationFiles")
+    COMPONENT "config"
+)
 if(WIN32)
-    set(CMAKE_INSTALL_SYSTEM_RUNTIME_COMPONENT "Executables")
+    set(CMAKE_INSTALL_SYSTEM_RUNTIME_COMPONENT "runtime")
     include (InstallRequiredSystemLibraries)
 
-    install(
-        DIRECTORY $<TARGET_FILE_DIR:imx_uart>/
+    install(DIRECTORY $<TARGET_FILE_DIR:imx_uart>/
         DESTINATION ${CMAKE_INSTALL_BINDIR}
-        COMPONENT "Executables"
-        FILES_MATCHING PATTERN "*.dll")
+        COMPONENT "dev"
+        FILES_MATCHING PATTERN "*.dll"
+    )
 endif()
 
 #---------- Testing -------------
+
 enable_testing()
 
 set(TESTS_CONFIG_DIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -179,6 +214,7 @@ if(WIN32)
     list(APPEND CPACK_WIX_PATCH_FILE    "${CMAKE_CURRENT_SOURCE_DIR}/wix_patch.xml")
 elseif(UNIX)
     set(CPACK_GENERATOR                 "DEB;ZIP")
+    set(CPACK_DEB_COMPONENT_INSTALL     "1")
 
     if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
         set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE   "amd64")
@@ -197,11 +233,14 @@ endif()
 
 include(CPack)
 
-cpack_add_component(Executables
-    DISPLAY_NAME "Executables"
+cpack_add_component(runtime
+    DISPLAY_NAME "Runtime"
     DESCRIPTION "Programs and required libraries"
     REQUIRED)
-cpack_add_component(ConfigurationFiles
-    DISPLAY_NAME "Configuration Files"
+cpack_add_component(config
+    DISPLAY_NAME "Configuration"
     DESCRIPTION "Set of default configuration files"
-    DEPENDS Executables)
+    DEPENDS runtime)
+cpack_add_component(dev
+    DISPLAY_NAME "Development"
+    DESCRIPTION "Libraries and headers used for development")

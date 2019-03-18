@@ -20,7 +20,6 @@
 #ifndef __IMX_USB_LIB_H__
 #define __IMX_USB_LIB_H__
 
-struct usb_app_args;
 struct usb_app_args {
 	int verify;
 	struct sdp_work *cmd_head;
@@ -30,7 +29,8 @@ struct usb_app_args {
 	int bus;
 	int address;
 };
+typedef struct usb_app_args usb_app_args;
 
-int usb_app_execute(struct usb_app_args* args);
+int usb_app_execute(usb_app_args* args);
 
 #endif /* __IMX_USB_LIB_H__ */

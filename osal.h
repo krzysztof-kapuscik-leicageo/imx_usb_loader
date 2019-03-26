@@ -60,10 +60,10 @@ struct imx_osal_ops
 typedef struct imx_osal_ops imx_osal_ops;
 
 /* Returns currently registered OSAL operations. */
-imx_osal_ops* imx_get_osal();
+const imx_osal_ops* imx_get_osal();
 
 /* Sets OSAL operations to be used by the libraries. */
-void imx_set_osal(imx_osal_ops* ops);
+void imx_set_osal(const imx_osal_ops* ops);
 
 #ifdef __cplusplus
 }

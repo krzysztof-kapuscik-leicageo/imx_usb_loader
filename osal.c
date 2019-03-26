@@ -73,7 +73,7 @@ static int osal_file_access_read(const char *filename)
 	return access(filename, R_OK);
 }
 
-struct imx_osal_ops default_osal_ops = {
+const imx_osal_ops default_osal_ops = {
 	osal_file_open,
 	osal_file_close,
 	osal_file_gets,
@@ -84,14 +84,14 @@ struct imx_osal_ops default_osal_ops = {
 	osal_file_access_read
 };
 
-static imx_osal_ops* osal_ops = &default_osal_ops;
+static const imx_osal_ops* osal_ops = &default_osal_ops;
 
-imx_osal_ops* imx_get_osal()
+const imx_osal_ops* imx_get_osal()
 {
 	return osal_ops;
 }
 
-void imx_set_osal(imx_osal_ops* ops)
+void imx_set_osal(const imx_osal_ops* ops)
 {
 	if (ops != NULL)
 	{

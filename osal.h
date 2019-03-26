@@ -22,6 +22,10 @@
 
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* std FILE* replacement */
 struct imx_osal_file;
 typedef struct imx_osal_file imx_osal_file;
@@ -60,5 +64,9 @@ imx_osal_ops* imx_get_osal();
 
 /* Sets OSAL operations to be used by the libraries. */
 void imx_set_osal(imx_osal_ops* ops);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __IMX_OSAL_H__ */

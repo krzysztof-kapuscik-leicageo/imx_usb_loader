@@ -20,6 +20,12 @@
 #ifndef __IMX_USB_LIB_H__
 #define __IMX_USB_LIB_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+struct sdp_work;
+
 struct usb_app_args {
 	int verify;
 	struct sdp_work *cmd_head;
@@ -32,5 +38,9 @@ struct usb_app_args {
 typedef struct usb_app_args usb_app_args;
 
 int usb_app_execute(usb_app_args* args);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __IMX_USB_LIB_H__ */

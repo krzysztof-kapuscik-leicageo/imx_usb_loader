@@ -93,5 +93,12 @@ imx_osal_ops* imx_get_osal()
 
 void imx_set_osal(imx_osal_ops* ops)
 {
-	osal_ops = ops;
+	if (ops != NULL)
+	{
+		osal_ops = ops;
+	}
+	else
+	{
+		osal_ops = &default_osal_ops;
+	}
 }

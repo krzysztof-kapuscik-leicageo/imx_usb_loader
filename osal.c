@@ -73,6 +73,11 @@ static int osal_file_access_read(const char *filename)
 	return access(filename, R_OK);
 }
 
+static void osal_print(int error, const char* format, va_list args)
+{
+	vfprintf(error ? stderr : stdout, format, args);
+}
+
 const imx_osal_ops default_osal_ops = {
 	osal_file_open,
 	osal_file_close,
@@ -81,7 +86,8 @@ const imx_osal_ops default_osal_ops = {
 	osal_file_read,
 	osal_file_rewind,
 	osal_file_tell,
-	osal_file_access_read
+	osal_file_access_read,
+	osal_print
 };
 
 static const imx_osal_ops* osal_ops = &default_osal_ops;

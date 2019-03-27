@@ -1,20 +1,59 @@
 #ifndef __PORTABLE_H__
 #define __PORTABLE_H__
 
+#include <stdio.h>
+#include <stdarg.h>
+
+#include "osal.h"
+
 extern int debugmode;
 
+static inline void printf_wrapper(const char* format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	imx_get_osal()->print(0, format, args);
+	va_end(args);
+}
+
+static inline void fprintf_wrapper(FILE* fstr, const char* format, ...)
+{
+	if (fstr == stdout) {
+		va_list args;
+		va_start(args, format);
+		imx_get_osal()->print(0, format, args);
+		va_end(args);
+	} else if (fstr == stderr) {
+		va_list args;
+		va_start(args, format);
+		imx_get_osal()->print(1, format, args);
+		va_end(args);
+	} else {
+		va_list args;
+		va_start(args, format);
+		vfprintf(fstr, format, args);
+		va_end(args);
+	}
+}
+
+#define printf		printf_wrapper
+#define fprintf		fprintf_wrapper
+
 #ifndef WIN32
-#define dbg_printf(fmt, args...)	do{ if(debugmode) fprintf(stderr, fmt, ## args); } while(0)
-#define dbg_dump_long(src, cnt, addr, skip) do{ if(debugmode) dump_long(src, cnt, addr, skip); } while(0)
+
+#define dbg_printf(fmt, args...) \
+	do{ if(debugmode) fprintf(stderr, fmt, ## args); } while(0)
+#define dbg_dump_long(src, cnt, addr, skip) \
+	do{ if(debugmode) dump_long(src, cnt, addr, skip); } while(0)
+
 #else
 
-#ifdef DEBUG
-#define dbg_printf(fmt, ...)	fprintf(stderr, fmt, __VA_ARGS__)
-#define dbg_dump_long(src, cnt, addr, skip) dump_long(src, cnt, addr, skip)
-#else
-#define dbg_dump_long(src, cnt, addr, skip)
-#define dbg_printf(fmt, ...)    /* Don't do anything in release builds */
-#endif
+#define dbg_printf(fmt, ...) \
+	do{ if(debugmode) fprintf(stderr, fmt, __VA_ARGS__); } while(0)
+
+#define dbg_dump_long(src, cnt, addr, skip) \
+	do{ if(debugmode) dump_long(src, cnt, addr, skip); } while(0)
+
 #endif
 
 #ifndef _MSC_VER
@@ -34,8 +73,6 @@ extern int debugmode;
 #ifdef __FreeBSD__
 #include <sys/param.h>
 #endif
-
-#include "osal.h"
 
 #ifndef WIN32
 #define PATH_SEPARATOR '/'

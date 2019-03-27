@@ -21,6 +21,7 @@
 #define __IMX_OSAL_H__
 
 #include <stdlib.h>
+#include <stdarg.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,6 +57,9 @@ struct imx_osal_ops
 
 	/* posix access R_OK replacement */
 	int (*file_access_read)(const char *filename);
+
+	/* printf/fprintf wrapper */
+	void(*print)(int error, const char* format, va_list args);
 };
 typedef struct imx_osal_ops imx_osal_ops;
 

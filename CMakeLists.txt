@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 set(imxusbloader_VERSION_MAJOR             1)
 set(imxusbloader_VERSION_MINOR             0)
 set(imxusbloader_VERSION_PATCH             3)
@@ -8,11 +10,10 @@ set(imxusbloader_VERSION_FULL              "${imxusbloader_VERSION_MAJOR}.${imxu
 
 project(imxusbloader VERSION ${imxusbloader_VERSION_FULL})
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(MiscHelpers)
+vcpkg_setup_linking()
+
 find_package(LibUsb10 REQUIRED)
-if(WIN32)
-    find_package(GetOpt REQUIRED)
-endif()
 
 set(IMX_COMMON_SOURCES
     image.h
@@ -25,6 +26,15 @@ set(IMX_COMMON_SOURCES
     osal.c
     portable.h
 )
+
+if(MSVC)
+    set(IMX_GETOPT_SOURCES
+        "msvc/getopt.h"
+        "msvc/getopt.c"
+    )
+else()
+    set(IMX_GETOPT_SOURCES "")
+endif()
 
 set(IMX_COMMON_PUBLIC_HEADERS
     osal.h
@@ -83,28 +93,22 @@ if(MSVC)
     target_compile_definitions(imx_usb_core PRIVATE _CRT_SECURE_NO_WARNINGS=1)
 endif()
 
-add_executable(imx_usb ${IMX_USB_SOURCES})
+add_executable(imx_usb ${IMX_USB_SOURCES} ${IMX_GETOPT_SOURCES})
 target_compile_definitions(imx_usb PRIVATE IMX_USB_APP_ONLY)
 target_link_libraries(imx_usb PRIVATE imx_common)
 target_link_libraries(imx_usb PRIVATE imx_usb_core)
 target_include_directories(imx_usb PRIVATE ${LIBUSB10_INCLUDE_DIRS})
 target_link_libraries(imx_usb PRIVATE ${LIBUSB10_LIBRARIES})
 target_compile_definitions(imx_usb PRIVATE ${LIBUSB10_DEFINITIONS})
-if(WIN32)
-    target_include_directories(imx_usb PRIVATE ${GETOPT_INCLUDE_DIRS})
-    target_link_libraries(imx_usb PRIVATE ${GETOPT_LIBRARIES})
-endif()
 if(MSVC)
+    target_include_directories(imx_usb PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     target_compile_definitions(imx_usb PRIVATE _CRT_SECURE_NO_WARNINGS=1)
 endif()
 
-add_executable(imx_uart ${IMX_UART_SOURCES})
+add_executable(imx_uart ${IMX_UART_SOURCES} ${IMX_GETOPT_SOURCES})
 target_link_libraries(imx_uart PRIVATE imx_common)
-if(WIN32)
-    target_include_directories(imx_uart PRIVATE ${GETOPT_INCLUDE_DIRS})
-    target_link_libraries(imx_uart PRIVATE ${GETOPT_LIBRARIES})
-endif()
 if(MSVC)
+    target_include_directories(imx_uart PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     target_compile_definitions(imx_uart PRIVATE _CRT_SECURE_NO_WARNINGS=1)
 endif()
 
@@ -142,12 +146,14 @@ install(FILES ${CONFIGURATION_FILES}
     COMPONENT "config"
 )
 if(WIN32)
-    set(CMAKE_INSTALL_SYSTEM_RUNTIME_COMPONENT "runtime")
-    include (InstallRequiredSystemLibraries)
+    if (VCPKG_CRT_LINKAGE STREQUAL "static")
+        set(CMAKE_INSTALL_SYSTEM_RUNTIME_COMPONENT "runtime")
+        include (InstallRequiredSystemLibraries)
+    endif()
 
     install(DIRECTORY $<TARGET_FILE_DIR:imx_uart>/
         DESTINATION ${CMAKE_INSTALL_BINDIR}
-        COMPONENT "dev"
+        COMPONENT "runtime"
         FILES_MATCHING PATTERN "*.dll"
     )
 endif()

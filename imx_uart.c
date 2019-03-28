@@ -27,7 +27,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
+#ifndef WIN32
 #include <getopt.h>
+#else
+#include <msvc/getopt.h>
+#endif
 
 #include <fcntl.h>
 

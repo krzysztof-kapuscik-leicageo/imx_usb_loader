@@ -28,7 +28,11 @@
 #include <stdlib.h>
 #include <stdint.h>
 #ifdef IMX_USB_APP_ONLY
+#ifndef WIN32
 #include <getopt.h>
+#else
+#include <msvc/getopt.h>
+#endif
 #endif /* IMX_USB_LIB_ONLY */
 
 #ifdef __FreeBSD__
